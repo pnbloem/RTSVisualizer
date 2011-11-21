@@ -28,15 +28,21 @@ schedules[1] = sched2;
 $(function(){
 	//This is where setup stuff should happen.
 	$("#schedule_graphs").append("<div id='schedules'></div>");
+	generatePlots(schedules);
 });
 
 function generatePlots(schedules){
-	
+	for(s in schedules){
+		//Generate a schedule plot for each of the provided schedules.
+		generatePlot(parseInt(s), schedules[s]);
+	}
 }
 
 
 function generatePlot(s, schedule){
-	$("#schedules").append("<div class='schedule' id='schedule_" + s + "'></div>");
+	$("#schedules").append("<div class='schedule_wrap' id='schedule_wrap_"+s+"'></div>");
+	$("#schedule_wrap_"+s).append("<div class='schedule' id='schedule_"+s+"'></div>");
+	$("#schedule_wrap_"+s).append("<div class='overview' id='overview_"+s+"'></div>");
 	var points = [];
 	for(segment in schedule){
 		var seg = schedule[segment];
@@ -53,16 +59,36 @@ function generatePlot(s, schedule){
 		}
 		points[seg[2]].push(null);
 	}
-	console.log(points);
+	
 	var options = {
 		series: {
 			lines: { show:true,
 					 lineWidth: 10}
 		},
 		yaxis: {
-			ticks: [0, 1, 2, 3],
 			tickDecimals: 0
-		}
+		},
+		selection: {mode: "x"}
 	};
-	$.plot($("#schedule_" + s), points, options);
+	var plot = $.plot($("#schedule_" + s), points, options);
+	var overview = $.plot($("#overview_"+s), points , {
+		series: {
+			lines: { show: true, lineWidth: 1 },
+			shadowSize: 0
+		},
+		xaxis: { ticks: [], mode: "time" },
+		yaxis: { ticks: [], min: 0, autoscaleMargin: 0.1 },
+		colors: ["#12375C"],
+		selection: { mode: "x", color:"#AAAAAA" }
+	});
+	$("#schedule_"+s).bind("plotselected", function(event, ranges){
+		plot = $.plot($("#schedule_"+s), points,
+			$.extend(true, {}, options, {
+						  xaxis: { min: ranges.xaxis.from, max: ranges.xaxis.to }
+					  }));		
+		overview.setSelection(ranges,true);
+	});
+	$("#overview_"+s).bind("plotselected", function(event, ranges){
+		plot.setSelection(ranges);
+	});
 }	
