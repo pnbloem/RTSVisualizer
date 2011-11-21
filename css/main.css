@@ -5,3 +5,9 @@
 #schedule_graphs{
 	border:1px solid black;
 }
+
+div.schedule{
+	height:100px;
+	width:300px;
+	border:1px solid red;
+}
