@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<title>RTSVisualizer :: Editor</title>
+		<link rel='stylesheet' type='text/css' href='css/main.css' />
+		<link rel='stylesheet' type='text/css' href="css/editor.css" />
+		<link rel='stylesheet' type='text/css' href="jquery/css/ui-lightness/jquery-ui-1.8.16.custom.css" />
+		
+		<script type="text/javascript" src="jquery/js/jquery-1.6.2.min.js"></script>
+		<script type="text/javascript" src="flot/jquery.flot.js"></script>
+		<script type="text/javascript" src="flot/jquery.flot.selection.js"></script>
+		
+		<script type="text/javascript" src="jquery/js/jquery-ui-1.8.16.custom.min.js"></script>
+		<script type="text/javascript" src="js/editor.js"></script>
+	</head>
+	<body>
+		
+		
+		<form action='#' method='post'>
+	
+	<div id='tasklist'>
+		<h3><a href='#'>New Task</a></h3>
+		<div class='task' > <!-- id='0' -->
+			<table>
+				<tr><th>Name</th><td><input class='widefield' type='text' onblur='parseName(this)' /></td></tr>
+				<tr><th>WCET</th><td><input type='number' /></td></tr>
+				<tr><th>Start Time</th><td><input type='number' /></td></tr>
+				<tr><th>Period (Deadline)</th><td><input type='number' /></td></tr>
+				<tr><th>Priority</th><td>
+					<ul class='priority'>
+						<li class='pri-up'><a href='#' onclick='moveUp(this)'><img src='img/001_28.png' alt='up'/></a></li>
+						<li class='pri-down'><a href='#' onclick='moveDown(this)'><img src='img/001_26.png' alt='up'/></a></li>
+					</ul></td></tr>
+				<tr><th>Color</th><td>--</td></tr>
+			</table>
+		</div>	
+
+		
+	</div>	
+		Add Task: <a href='#' onclick='addTask()'><img src='img/001_01.png' alt='add task' /></a>
+	</form></body>
+</html>

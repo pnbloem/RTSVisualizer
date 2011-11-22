@@ -1,0 +1,13 @@
+.priority {
+	color: #FFF;
+	list-style-type: none;
+	margin: auto;
+	padding: auto;
+}
+.task input {
+	width: 50px;
+}
+
+.task .widefield {
+	width: 100px;
+}
