@@ -32,6 +32,7 @@ $(function(){
 });
 
 function generatePlots(schedules){
+	$("#schedules").empty();
 	for(s in schedules){
 		//Generate a schedule plot for each of the provided schedules.
 		generatePlot(parseInt(s), schedules[s]);
@@ -91,4 +92,47 @@ function generatePlot(s, schedule){
 	$("#overview_"+s).bind("plotselected", function(event, ranges){
 		plot.setSelection(ranges);
 	});
-}	
+}
+
+function scheduleTasks(){
+	var tasks = [];
+	//console.log("Here");
+	storeTasks(tasks);
+	//console.log("Tasks stored.");
+	generateSchedule(tasks);
+}
+
+function storeTasks(tasks){
+	$("#tasklist").find(".task").each(function(){
+		var id = $(this).attr('id');
+		var name = $(this).find('#name_'+id).val();
+		var wcet = $(this).find('#wcet_'+id).val();
+		var start = $(this).find('#start_'+id).val();
+		var period = $(this).find('#period_'+id).val();
+		if((id == "") || (name == "") || (wcet == "") || (start == "") || (period == "")){
+			alert("Please fill in all values.");
+			return;
+		}
+		//alert("ID:" + id + " Name:" + name + " WCET:" + wcet + " Start:"+ start + " Period:" + period); 
+		var task = {'id':id, 'name':name, 'wcet':parseInt(wcet), 'start':parseInt(start), 'period':parseInt(period)};
+		tasks.push(task);
+		//console.log(tasks);
+	});
+}
+
+function generateSchedule(tasks){
+	schedules = [];
+	schedules.push(prioritySchedule(tasks));
+	generatePlots(schedules);
+}
+
+function prioritySchedule(tasks){
+	schedule = [];
+	var currTime = 0;
+	for(t in tasks){
+		schedule.push([currTime, currTime + tasks[t]['wcet'], t]); 
+		currTime += tasks[t]['wcet'];
+	}
+	console.log(schedule);
+	return schedule;
+}
