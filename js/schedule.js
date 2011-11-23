@@ -12,23 +12,10 @@
 //Declare some dummy schedules
 var schedules = new Array();
 
-var sched1 = new Array();
-sched1[0] = new Array(0, 10, 0);
-sched1[1] = new Array(10, 12, 1);
-sched1[2] = new Array(12, 20, 2);
-
-var sched2 = new Array();
-sched2[0] = new Array(0, 1, 0);
-sched2[1] = new Array(1, 15, 1);
-sched2[2] = new Array(15, 20, 0);
-
-schedules[0] = sched1;
-schedules[1] = sched2;
-
 $(function(){
 	//This is where setup stuff should happen.
-	$("#schedule_graphs").append("<div id='schedules'></div>");
-	generatePlots(schedules);
+	$("#schedule_graphs").append("<div id='schedules'>Schedules will go here once you create them.</div>");
+	
 });
 
 function generatePlots(schedules){
