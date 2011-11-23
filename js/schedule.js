@@ -120,6 +120,6 @@ function prioritySchedule(tasks){
 		schedule.push([currTime, currTime + tasks[t]['wcet'], t]); 
 		currTime += tasks[t]['wcet'];
 	}
-	console.log(schedule);
+	//console.log(schedule);
 	return schedule;
 }

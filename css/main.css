@@ -1,4 +1,7 @@
-#header{
+body{
+	font-family:helvetica;
+}
+#header_wrap{
 	border:1px solid black;
 	position:absolute;
 	left:0px;
@@ -7,21 +10,30 @@
 	width:1010px;
 	line-height:40px;
 }
+#header{
+	margin-left:20px;
+	font-size:1.2em;
+	font-weight:bold;
+}
 
-#task_list{
-	border:1px solid black;
+#task_list_wrap{
 	position:absolute;
 	left:0px;
 	top:41px;
-	width:250px;
+	width:270px;
+}
+#task_list{
+	margin:10px;
 }
 
-#schedule_graphs{
-	border:1px solid black;
+#schedule_graphs_wrap{
 	position:absolute;
-	left:260px;
+	left:270px;
 	top:41px;
-	width:750px;
+	width:740px;
+}
+#schedule_graphs{
+	margin:10px;
 }
 
 div.schedule{
