@@ -109,12 +109,13 @@ function storeTasks(tasks){
 
 function generateSchedule(tasks){
 	schedules = [];
-	schedules.push(prioritySchedule(tasks));
+	schedules.push(nonSchedule(tasks));
+	schedules.push(rmSchedule(tasks));
 	generatePlots(schedules);
 }
 
-function prioritySchedule(tasks){
-	schedule = [];
+function nonSchedule(tasks){
+	var schedule = [];
 	var currTime = 0;
 	for(t in tasks){
 		schedule.push([currTime, currTime + tasks[t]['wcet'], t]); 
@@ -123,3 +124,121 @@ function prioritySchedule(tasks){
 	//console.log(schedule);
 	return schedule;
 }
+
+function rmSchedule(tasks){
+	var schedule = []
+	
+	var simLen = periodLCM(tasks);
+	var remainingExecutionTime = new Array();
+	var schedulable = new Array();
+	for(t in tasks){
+		remainingExecutionTime.push(tasks[t]['wcet']);
+		schedulable.push(false);
+	}
+	var timeSegment = [null, null, null];
+	for(var i = 0; i < simLen; i++){
+		console.log(remainingExecutionTime);
+		//If a multiple of task period, replenish remaining execution time
+		if(i != 0){
+			for(t in tasks){
+				if((i % tasks[t]['period']) == 0){
+					if(remainingExecutionTime[t] != 0){
+						alert("ERROR");
+					}
+					remainingExecutionTime[t] = tasks[t]['wcet'];
+				}
+			}
+		}		
+		//Determine which task executes during each time unit.
+		var taskToRun = null;
+		var taskToRunPeriod = null;
+		for(t in tasks){
+			console.log(t);
+			if(remainingExecutionTime[t] != 0){
+				if(taskToRunPeriod == null){
+					taskToRun = t;
+					taskToRunPeriod = tasks[t]['period'];
+				} else if(tasks[t]['period'] < taskToRunPeriod){
+					taskToRun = t;
+					taskToRunPeriod = tasks[t]['period'];
+				}
+			}
+		}
+		//Decrement remaining execution time
+		if(taskToRun != null){
+			console.log("Starting checks...");
+			remainingExecutionTime[taskToRun]--;
+			if(remainingExecutionTime[taskToRun] == 0){
+				console.log("Done with this task for now: " + taskToRun);
+				schedulable[taskToRun] = true;
+			}
+			
+			if(taskToRun == timeSegment[2]){
+				console.log("Incrementing timeSeg");
+				timeSegment[1]++;
+			} else {
+				if(timeSegment[0] == null){
+					timeSegment[0] = 0;
+					timeSegment[1] = 1;
+					timeSegment[2] = taskToRun;
+				} else {
+					schedule.push([timeSegment[0], timeSegment[1], timeSegment[2]]);
+					timeSegment[0] = i;
+					timeSegment[1] = i+1;
+					timeSegment[2] = taskToRun;
+				}
+			}
+		} 
+	}	
+	schedule.push([timeSegment[0], timeSegment[1], timeSegment[2]]);
+	console.log(schedule);
+	return schedule;
+}
+
+function gcd(a, b){
+	var t;
+	while(b != 0){
+		t = b;
+		b = a % b;
+		a = t;
+	}
+	return a;
+}
+function lcm(a, b){
+	return (a * b / gcd(a, b));
+}	
+function periodLCM(args){
+	var tasks = args;
+	if(tasks.length == 1){
+		return tasks[0]['period'];
+	}
+	if(tasks.length == 2){
+		return lcm(tasks[0]['period'], tasks[1]['period']);
+	} else {
+		var task0 = tasks[0];
+		tasks.shift();
+		return lcm(task0['period'], periodLCM(tasks));
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
