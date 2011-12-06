@@ -3,7 +3,7 @@ $(function() {
 	//window.alert('hello');
 
 	$("#task_list").append("<div id='tasklist'></div>");
-	$("#task_list").append("<div id='add_task'>Add Task: <a href='#' onclick='addTask()'><img src='img/001_01.png' alt='add task' /></a></div>");
+	$("#task_list").append("<div id='add_task' onclick='addTask()'>Add New Task</div>");
 	$("#task_list").append("<div id='create_sched' onclick='scheduleTasks()'>Create Schedule</div>");
 	$("#tasklist").append(generateTaskHTML(numTasks));
 	$("#tasklist").accordion({'collapsible':true});

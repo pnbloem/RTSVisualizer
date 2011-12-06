@@ -15,7 +15,8 @@ var simLen;
 
 $(function(){
 	//This is where setup stuff should happen.
-	$("#schedule_graphs").append("<div id='schedules'>Schedules will go here once you create them.</div>");
+	$("#schedule_graphs").append("<div id='schedules'>Add some tasks and click 'Create Schedule'\
+	to give it a try!</div>");
 	
 });
 
@@ -26,7 +27,6 @@ function generatePlots(schedules){
 		generatePlot(parseInt(s), schedules[s]);
 	}
 }
-
 
 function generatePlot(s, schedule){
 	$("#schedules").append("<div class='schedule_wrap' id='schedule_wrap_"+s+"'></div>");
@@ -69,7 +69,7 @@ function generatePlot(s, schedule){
 			lines: { show: true, lineWidth: 1 },
 			shadowSize: 0
 		},
-		xaxis: { ticks: [], mode: "time" },
+		xaxis: { ticks: [], mode: "time", min: 0, max: simLen },
 		yaxis: { ticks: [], min: 0, autoscaleMargin: 0.1 },
 		colors: ["#12375C"],
 		selection: { mode: "x", color:"#AAAAAA" }
