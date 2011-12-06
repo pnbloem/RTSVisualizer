@@ -116,6 +116,7 @@ function generateSchedule(tasks){
 	schedules.push(nonSchedule(tasks));
 	schedules.push(rmSchedule(tasks, simLen));
 	schedules.push(minLaxSchedule(tasks, simLen));
+	//ADD MORE SCHEDULING ALGORITHMS HERE
 	generatePlots(schedules);
 }
 
@@ -208,8 +209,6 @@ function minLaxSchedule(tasks, simLen){
 	}
 	var timeSegment = [null, null, null];
 	for(var i = 0; i < simLen; i++){
-		//console.log(remainingExecutionTime);
-		//If a multiple of task period, replenish remaining execution time
 		if(i != 0){
 			for(t in tasks){
 				if((i % tasks[t]['period']) == 0){
@@ -221,10 +220,26 @@ function minLaxSchedule(tasks, simLen){
 			}
 		}		
 		//Determine which task executes during each time unit.
+		/*
+		 * This is where the choice to run one task over another is made
+		 * at any given point in time (i). To do this, choose the variable
+		 * you're making the decision on (in this case, taskToRunLaxity).
+		 * Then, in the if(taskToRunLaxity == null) statement, set the 
+		 * value (This will give a baseline task that will run. If no
+		 * tasks have execution time yet, taskToRun remains null, and
+		 * the schedule appropriately has a gap.), and the taskToRun.
+		 *
+		 * In the else if statement, check if the current task you're
+		 * checking should have higher priority. In this case, whether
+		 * the laxity is less than the minimum laxity found thus far.
+		 * If the task should have higher priority, replace taskToRun
+		 * and the decision variable with those from the new task.
+		 *
+		 * That's it! Everything else is taken care of!
+  		 */
 		var taskToRun = null;
 		var taskToRunLaxity = null;
 		for(t in tasks){
-			//console.log(t);
 			if(remainingExecutionTime[t] != 0){
 				if(taskToRunLaxity == null){
 					taskToRun = t;
