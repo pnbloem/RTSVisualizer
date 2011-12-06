@@ -17,7 +17,7 @@ $(function(){
 	//This is where setup stuff should happen.
 	$("#schedule_graphs").append("<div id='schedules'>Add some tasks and click 'Create Schedule'\
 	to give it a try!</div>");
-	
+	 
 });
 
 function generatePlots(schedules){
