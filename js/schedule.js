@@ -11,10 +11,12 @@
 */
 //Declare some dummy schedules
 var schedules = new Array();
+var simLen;
 
 $(function(){
 	//This is where setup stuff should happen.
-	$("#schedule_graphs").append("<div id='schedules'>Schedules will go here once you create them.</div>");
+	$("#schedule_graphs").append("<div id='schedules'>Add some tasks and click 'Create Schedule'\
+	to give it a try!</div>");
 	
 });
 
@@ -25,7 +27,6 @@ function generatePlots(schedules){
 		generatePlot(parseInt(s), schedules[s]);
 	}
 }
-
 
 function generatePlot(s, schedule){
 	$("#schedules").append("<div class='schedule_wrap' id='schedule_wrap_"+s+"'></div>");
@@ -56,6 +57,10 @@ function generatePlot(s, schedule){
 		yaxis: {
 			tickDecimals: 0
 		},
+		xaxis: {
+			min: 0,
+			max: simLen
+		},
 		selection: {mode: "x"}
 	};
 	var plot = $.plot($("#schedule_" + s), points, options);
@@ -64,7 +69,7 @@ function generatePlot(s, schedule){
 			lines: { show: true, lineWidth: 1 },
 			shadowSize: 0
 		},
-		xaxis: { ticks: [], mode: "time" },
+		xaxis: { ticks: [], mode: "time", min: 0, max: simLen },
 		yaxis: { ticks: [], min: 0, autoscaleMargin: 0.1 },
 		colors: ["#12375C"],
 		selection: { mode: "x", color:"#AAAAAA" }
@@ -83,9 +88,7 @@ function generatePlot(s, schedule){
 
 function scheduleTasks(){
 	var tasks = [];
-	//console.log("Here");
 	storeTasks(tasks);
-	//console.log("Tasks stored.");
 	generateSchedule(tasks);
 }
 
@@ -109,8 +112,11 @@ function storeTasks(tasks){
 
 function generateSchedule(tasks){
 	schedules = [];
+	simLen = periodLCM(tasks);
 	schedules.push(nonSchedule(tasks));
-	schedules.push(rmSchedule(tasks));
+	schedules.push(rmSchedule(tasks, simLen));
+	schedules.push(minLaxSchedule(tasks, simLen));
+	//ADD MORE SCHEDULING ALGORITHMS HERE
 	generatePlots(schedules);
 }
 
@@ -125,10 +131,9 @@ function nonSchedule(tasks){
 	return schedule;
 }
 
-function rmSchedule(tasks){
+function rmSchedule(tasks, simLen){
 	var schedule = []
 	
-	var simLen = periodLCM(tasks);
 	var remainingExecutionTime = new Array();
 	var schedulable = new Array();
 	for(t in tasks){
@@ -137,13 +142,13 @@ function rmSchedule(tasks){
 	}
 	var timeSegment = [null, null, null];
 	for(var i = 0; i < simLen; i++){
-		console.log(remainingExecutionTime);
+		//console.log(remainingExecutionTime);
 		//If a multiple of task period, replenish remaining execution time
 		if(i != 0){
 			for(t in tasks){
 				if((i % tasks[t]['period']) == 0){
 					if(remainingExecutionTime[t] != 0){
-						alert("ERROR");
+						console.log("ERROR: " + t);
 					}
 					remainingExecutionTime[t] = tasks[t]['wcet'];
 				}
@@ -153,7 +158,7 @@ function rmSchedule(tasks){
 		var taskToRun = null;
 		var taskToRunPeriod = null;
 		for(t in tasks){
-			console.log(t);
+			//console.log(t);
 			if(remainingExecutionTime[t] != 0){
 				if(taskToRunPeriod == null){
 					taskToRun = t;
@@ -166,15 +171,14 @@ function rmSchedule(tasks){
 		}
 		//Decrement remaining execution time
 		if(taskToRun != null){
-			console.log("Starting checks...");
+			//console.log("Starting checks...");
 			remainingExecutionTime[taskToRun]--;
 			if(remainingExecutionTime[taskToRun] == 0){
-				console.log("Done with this task for now: " + taskToRun);
+				//console.log("Done with this task for now: " + taskToRun);
 				schedulable[taskToRun] = true;
 			}
 			
 			if(taskToRun == timeSegment[2]){
-				console.log("Incrementing timeSeg");
 				timeSegment[1]++;
 			} else {
 				if(timeSegment[0] == null){
@@ -191,7 +195,87 @@ function rmSchedule(tasks){
 		} 
 	}	
 	schedule.push([timeSegment[0], timeSegment[1], timeSegment[2]]);
-	console.log(schedule);
+	return schedule;
+}
+
+function minLaxSchedule(tasks, simLen){
+	var schedule = []
+	
+	var remainingExecutionTime = new Array();
+	var schedulable = new Array();
+	for(t in tasks){
+		remainingExecutionTime.push(tasks[t]['wcet']);
+		schedulable.push(false);
+	}
+	var timeSegment = [null, null, null];
+	for(var i = 0; i < simLen; i++){
+		if(i != 0){
+			for(t in tasks){
+				if((i % tasks[t]['period']) == 0){
+					if(remainingExecutionTime[t] != 0){
+						console.log("ERROR: " + t);
+					}
+					remainingExecutionTime[t] = tasks[t]['wcet'];
+				}
+			}
+		}		
+		//Determine which task executes during each time unit.
+		/*
+		 * This is where the choice to run one task over another is made
+		 * at any given point in time (i). To do this, choose the variable
+		 * you're making the decision on (in this case, taskToRunLaxity).
+		 * Then, in the if(taskToRunLaxity == null) statement, set the 
+		 * value (This will give a baseline task that will run. If no
+		 * tasks have execution time yet, taskToRun remains null, and
+		 * the schedule appropriately has a gap.), and the taskToRun.
+		 *
+		 * In the else if statement, check if the current task you're
+		 * checking should have higher priority. In this case, whether
+		 * the laxity is less than the minimum laxity found thus far.
+		 * If the task should have higher priority, replace taskToRun
+		 * and the decision variable with those from the new task.
+		 *
+		 * That's it! Everything else is taken care of!
+  		 */
+		var taskToRun = null;
+		var taskToRunLaxity = null;
+		for(t in tasks){
+			if(remainingExecutionTime[t] != 0){
+				if(taskToRunLaxity == null){
+					taskToRun = t;
+					taskToRunLaxity = (tasks[t]['period'] - (i % tasks[t]['period']));
+				} else if((tasks[t]['period'] - (i % tasks[t]['period'])) < taskToRunLaxity){
+					taskToRun = t;
+					taskToRunLaxity = (tasks[t]['period'] - (i % tasks[t]['period']));
+				}
+			}
+		}
+		//Decrement remaining execution time
+		if(taskToRun != null){
+			//console.log("Starting checks...");
+			remainingExecutionTime[taskToRun]--;
+			if(remainingExecutionTime[taskToRun] == 0){
+				//console.log("Done with this task for now: " + taskToRun);
+				schedulable[taskToRun] = true;
+			}
+			
+			if(taskToRun == timeSegment[2]){
+				timeSegment[1]++;
+			} else {
+				if(timeSegment[0] == null){
+					timeSegment[0] = 0;
+					timeSegment[1] = 1;
+					timeSegment[2] = taskToRun;
+				} else {
+					schedule.push([timeSegment[0], timeSegment[1], timeSegment[2]]);
+					timeSegment[0] = i;
+					timeSegment[1] = i+1;
+					timeSegment[2] = taskToRun;
+				}
+			}
+		} 
+	}	
+	schedule.push([timeSegment[0], timeSegment[1], timeSegment[2]]);
 	return schedule;
 }
 
@@ -207,17 +291,17 @@ function gcd(a, b){
 function lcm(a, b){
 	return (a * b / gcd(a, b));
 }	
-function periodLCM(args){
-	var tasks = args;
-	if(tasks.length == 1){
-		return tasks[0]['period'];
+function periodLCM(tasks){
+	var args = tasks.slice(0);
+	if(args.length == 1){
+		return args[0]['period'];
 	}
-	if(tasks.length == 2){
-		return lcm(tasks[0]['period'], tasks[1]['period']);
+	if(args.length == 2){
+		return lcm(args[0]['period'], args[1]['period']);
 	} else {
-		var task0 = tasks[0];
-		tasks.shift();
-		return lcm(task0['period'], periodLCM(tasks));
+		var arg0 = args[0];
+		args.shift();
+		return lcm(arg0['period'], periodLCM(args));
 	}
 }
 
