@@ -113,7 +113,7 @@ function storeTasks(tasks){
 function generateSchedule(tasks){
 	schedules = [];
 	simLen = periodLCM(tasks);
-	schedules.push(nonSchedule(tasks));
+	//schedules.push(nonSchedule(tasks));
 	schedules.push(rmSchedule(tasks, simLen));
 	schedules.push(minLaxSchedule(tasks, simLen));
 	//ADD MORE SCHEDULING ALGORITHMS HERE
@@ -136,24 +136,24 @@ function rmSchedule(tasks, simLen){
 	
 	var remainingExecutionTime = new Array();
 	var schedulable = new Array();
+	console.log(tasks);
 	for(t in tasks){
-		remainingExecutionTime.push(tasks[t]['wcet']);
+		remainingExecutionTime.push(0);
 		schedulable.push(false);
 	}
 	var timeSegment = [null, null, null];
 	for(var i = 0; i < simLen; i++){
 		//console.log(remainingExecutionTime);
 		//If a multiple of task period, replenish remaining execution time
-		if(i != 0){
-			for(t in tasks){
-				if((i % tasks[t]['period']) == 0){
-					if(remainingExecutionTime[t] != 0){
-						console.log("ERROR: " + t);
-					}
-					remainingExecutionTime[t] = tasks[t]['wcet'];
+		for(t in tasks){
+			if((i % tasks[t]['period']) == tasks[t]['start']){
+				if(remainingExecutionTime[t] != 0){
+					console.log("ERROR: " + t);
 				}
+				remainingExecutionTime[t] = tasks[t]['wcet'];
 			}
-		}		
+		}
+	
 		//Determine which task executes during each time unit.
 		var taskToRun = null;
 		var taskToRunPeriod = null;
@@ -170,6 +170,7 @@ function rmSchedule(tasks, simLen){
 			}
 		}
 		//Decrement remaining execution time
+		console.log(taskToRun);
 		if(taskToRun != null){
 			//console.log("Starting checks...");
 			remainingExecutionTime[taskToRun]--;
@@ -181,16 +182,12 @@ function rmSchedule(tasks, simLen){
 			if(taskToRun == timeSegment[2]){
 				timeSegment[1]++;
 			} else {
-				if(timeSegment[0] == null){
-					timeSegment[0] = 0;
-					timeSegment[1] = 1;
-					timeSegment[2] = taskToRun;
-				} else {
+				if(timeSegment[0] != null){
 					schedule.push([timeSegment[0], timeSegment[1], timeSegment[2]]);
-					timeSegment[0] = i;
-					timeSegment[1] = i+1;
-					timeSegment[2] = taskToRun;
 				}
+				timeSegment[0] = i;
+				timeSegment[1] = i+1;
+				timeSegment[2] = taskToRun;
 			}
 		} 
 	}	
@@ -204,21 +201,20 @@ function minLaxSchedule(tasks, simLen){
 	var remainingExecutionTime = new Array();
 	var schedulable = new Array();
 	for(t in tasks){
-		remainingExecutionTime.push(tasks[t]['wcet']);
+		remainingExecutionTime.push(0);
 		schedulable.push(false);
 	}
 	var timeSegment = [null, null, null];
-	for(var i = 0; i < simLen; i++){
-		if(i != 0){
-			for(t in tasks){
-				if((i % tasks[t]['period']) == 0){
-					if(remainingExecutionTime[t] != 0){
-						console.log("ERROR: " + t);
-					}
-					remainingExecutionTime[t] = tasks[t]['wcet'];
+	for(var i = 0; i < simLen; i++){		
+		for(t in tasks){
+			if((i % tasks[t]['period']) == tasks[t]['start']){
+				if(remainingExecutionTime[t] != 0){
+					console.log("ERROR: " + t);
 				}
+				remainingExecutionTime[t] = tasks[t]['wcet'];
 			}
-		}		
+		}
+		
 		//Determine which task executes during each time unit.
 		/*
 		 * This is where the choice to run one task over another is made
@@ -262,16 +258,12 @@ function minLaxSchedule(tasks, simLen){
 			if(taskToRun == timeSegment[2]){
 				timeSegment[1]++;
 			} else {
-				if(timeSegment[0] == null){
-					timeSegment[0] = 0;
-					timeSegment[1] = 1;
-					timeSegment[2] = taskToRun;
-				} else {
+				if(timeSegment[0] != null){
 					schedule.push([timeSegment[0], timeSegment[1], timeSegment[2]]);
-					timeSegment[0] = i;
-					timeSegment[1] = i+1;
-					timeSegment[2] = taskToRun;
 				}
+				timeSegment[0] = i;
+				timeSegment[1] = i+1;
+				timeSegment[2] = taskToRun;	
 			}
 		} 
 	}	
