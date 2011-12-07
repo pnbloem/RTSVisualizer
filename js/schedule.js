@@ -35,7 +35,7 @@ function generatePlots(schedules){
 function generateErrorDiv(name){
 	$("#schedules").append("<div class='schedule_wrap' id='schedule_wrap_"+s+"'></div>");
 	$("#schedule_wrap_"+s).append("<div class='schedule_name' id='sched_name_"+s+"'>"+name+"</div>");	
-	$("#schedule_wrap_"+s).append("<div class='schedule' id='schedule_"+s+"'>Not schedulable\
+	$("#schedule_wrap_"+s).append("<div class='schedule_error' id='schedule_"+s+"'>Not schedulable\
 	using this algorithm.</div>");
 }
 
@@ -118,7 +118,6 @@ function storeTasks(tasks){
 		//alert("ID:" + id + " Name:" + name + " WCET:" + wcet + " Start:"+ start + " Period:" + period); 
 		var task = {'id':id, 'name':name, 'wcet':parseInt(wcet), 'start':parseInt(start), 'period':parseInt(period)};
 		tasks.push(task);
-		//console.log(tasks);
 	});
 }
 
@@ -139,7 +138,6 @@ function nonSchedule(tasks){
 		schedule.push([currTime, currTime + tasks[t]['wcet'], t]); 
 		currTime += tasks[t]['wcet'];
 	}
-	//console.log(schedule);
 	return schedule;
 }
 
@@ -151,20 +149,16 @@ function rmSchedule(tasks, simLen){
 	
 	var remainingExecutionTime = new Array();
 	var schedulable = new Array();
-	console.log(tasks);
 	for(t in tasks){
 		remainingExecutionTime.push(0);
 		schedulable.push(false);
 	}
 	var timeSegment = [null, null, null];
 	for(var i = 0; i < simLen; i++){
-		//console.log(remainingExecutionTime);
 		//If a multiple of task period, replenish remaining execution time
 		for(t in tasks){
-			console.log("To go:" + remainingExecutionTime[t] + " Current Time:" + i + " i mod period:" + (i % tasks[t]['period']) + " Start:" + tasks[t]['start']);
 			if((i % tasks[t]['period']) == tasks[t]['start']){
 				if(remainingExecutionTime[t] != 0){
-					console.log("ERROR: " + t);
 					schedule['schedulable'] = false;
 					return schedule;
 				}
@@ -188,7 +182,6 @@ function rmSchedule(tasks, simLen){
 		}
 		//Decrement remaining execution time
 		if(taskToRun != null){
-			console.log("i:" + i + " task:" + taskToRun);
 			remainingExecutionTime[taskToRun]--;
 			
 			if(taskToRun == timeSegment[2]){
@@ -227,7 +220,6 @@ function minLaxSchedule(tasks, simLen){
 		for(t in tasks){
 			if((i % tasks[t]['period']) == tasks[t]['start']){
 				if(remainingExecutionTime[t] != 0){
-					console.log("ERROR: " + t);
 					schedule['schedulable'] = false;
 					return schedule;
 				}
@@ -268,10 +260,8 @@ function minLaxSchedule(tasks, simLen){
 		}
 		//Decrement remaining execution time
 		if(taskToRun != null){
-			//console.log("Starting checks...");
 			remainingExecutionTime[taskToRun]--;
 			if(remainingExecutionTime[taskToRun] == 0){
-				//console.log("Done with this task for now: " + taskToRun);
 				schedulable[taskToRun] = true;
 			}
 			
