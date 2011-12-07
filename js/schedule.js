@@ -24,27 +24,29 @@ function generatePlots(schedules){
 	$("#schedules").empty();
 	for(s in schedules){
 		//Generate a schedule plot for each of the provided schedules.
-		if(schedules[s] != "Error"){
+		if(schedules[s]['schedulable']){
 			generatePlot(parseInt(s), schedules[s]);
 		} else {
-			generateErrorDiv(s);
+			generateErrorDiv(schedules[s]['name']);
 		}
 	}
 }
 
-function generateErrorDiv(s){
+function generateErrorDiv(name){
 	$("#schedules").append("<div class='schedule_wrap' id='schedule_wrap_"+s+"'></div>");
+	$("#schedule_wrap_"+s).append("<div class='schedule_name' id='sched_name_"+s+"'>"+name+"</div>");	
 	$("#schedule_wrap_"+s).append("<div class='schedule' id='schedule_"+s+"'>Not schedulable\
 	using this algorithm.</div>");
 }
 
 function generatePlot(s, schedule){
 	$("#schedules").append("<div class='schedule_wrap' id='schedule_wrap_"+s+"'></div>");
+	$("#schedule_wrap_"+s).append("<div class='schedule_name' id='sched_name_"+s+"'>"+schedule['name']+"</div>");	
 	$("#schedule_wrap_"+s).append("<div class='schedule' id='schedule_"+s+"'></div>");
 	$("#schedule_wrap_"+s).append("<div class='overview' id='overview_"+s+"'></div>");
 	var points = [];
-	for(segment in schedule){
-		var seg = schedule[segment];
+	for(segment in schedule['timing']){
+		var seg = schedule['timing'][segment];
 		var segStart = seg[0];
 		var segEnd = seg[1];
 		var plotPt = [];
@@ -142,7 +144,10 @@ function nonSchedule(tasks){
 }
 
 function rmSchedule(tasks, simLen){
-	var schedule = []
+	var schedule = new Array();
+	schedule['name'] = "Rate Monotonic";
+	schedule['schedulable'] = true;
+	schedule['timing'] = [];
 	
 	var remainingExecutionTime = new Array();
 	var schedulable = new Array();
@@ -160,7 +165,8 @@ function rmSchedule(tasks, simLen){
 			if((i % tasks[t]['period']) == tasks[t]['start']){
 				if(remainingExecutionTime[t] != 0){
 					console.log("ERROR: " + t);
-					return "Error";
+					schedule['schedulable'] = false;
+					return schedule;
 				}
 				remainingExecutionTime[t] = tasks[t]['wcet'];
 			}
@@ -189,23 +195,26 @@ function rmSchedule(tasks, simLen){
 				timeSegment[1]++;
 			} else {
 				if(timeSegment[0] != null){
-					schedule.push([timeSegment[0], timeSegment[1], timeSegment[2]]);
+					schedule['timing'].push([timeSegment[0], timeSegment[1], timeSegment[2]]);
 				}
 				timeSegment[0] = i;
 				timeSegment[1] = i+1;
 				timeSegment[2] = taskToRun;
 			}
 		} else {
-			schedule.push([timeSegment[0], timeSegment[1], timeSegment[2]]);
+			schedule['timing'].push([timeSegment[0], timeSegment[1], timeSegment[2]]);
 			timeSegment = [null, null, null];
 		}
 	}	
-	schedule.push([timeSegment[0], timeSegment[1], timeSegment[2]]);
+	schedule['timing'].push([timeSegment[0], timeSegment[1], timeSegment[2]]);
 	return schedule;
 }
 
 function minLaxSchedule(tasks, simLen){
-	var schedule = []
+	var schedule = new Array();
+	schedule['name'] = "Minimum Laxity First";
+	schedule['schedulable'] = true;
+	schedule['timing'] = [];
 	
 	var remainingExecutionTime = new Array();
 	var schedulable = new Array();
@@ -219,7 +228,8 @@ function minLaxSchedule(tasks, simLen){
 			if((i % tasks[t]['period']) == tasks[t]['start']){
 				if(remainingExecutionTime[t] != 0){
 					console.log("ERROR: " + t);
-					return "Error";
+					schedule['schedulable'] = false;
+					return schedule;
 				}
 				remainingExecutionTime[t] = tasks[t]['wcet'];
 			}
@@ -269,18 +279,18 @@ function minLaxSchedule(tasks, simLen){
 				timeSegment[1]++;
 			} else {
 				if(timeSegment[0] != null){
-					schedule.push([timeSegment[0], timeSegment[1], timeSegment[2]]);
+					schedule['timing'].push([timeSegment[0], timeSegment[1], timeSegment[2]]);
 				}
 				timeSegment[0] = i;
 				timeSegment[1] = i+1;
 				timeSegment[2] = taskToRun;	
 			}
 		}  else {
-			schedule.push([timeSegment[0], timeSegment[1], timeSegment[2]]);
+			schedule['timing'].push([timeSegment[0], timeSegment[1], timeSegment[2]]);
 			timeSegment = [null, null, null];
 		}
 	}	
-	schedule.push([timeSegment[0], timeSegment[1], timeSegment[2]]);
+	schedule['timing'].push([timeSegment[0], timeSegment[1], timeSegment[2]]);
 	return schedule;
 }
 
