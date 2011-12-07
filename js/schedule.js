@@ -24,8 +24,18 @@ function generatePlots(schedules){
 	$("#schedules").empty();
 	for(s in schedules){
 		//Generate a schedule plot for each of the provided schedules.
-		generatePlot(parseInt(s), schedules[s]);
+		if(schedules[s] != "Error"){
+			generatePlot(parseInt(s), schedules[s]);
+		} else {
+			generateErrorDiv(s);
+		}
 	}
+}
+
+function generateErrorDiv(s){
+	$("#schedules").append("<div class='schedule_wrap' id='schedule_wrap_"+s+"'></div>");
+	$("#schedule_wrap_"+s).append("<div class='schedule' id='schedule_"+s+"'>Not schedulable\
+	using this algorithm.</div>");
 }
 
 function generatePlot(s, schedule){
@@ -112,7 +122,7 @@ function storeTasks(tasks){
 
 function generateSchedule(tasks){
 	schedules = [];
-	simLen = periodLCM(tasks);
+	simLen = 2*periodLCM(tasks);
 	//schedules.push(nonSchedule(tasks));
 	schedules.push(rmSchedule(tasks, simLen));
 	schedules.push(minLaxSchedule(tasks, simLen));
@@ -146,9 +156,11 @@ function rmSchedule(tasks, simLen){
 		//console.log(remainingExecutionTime);
 		//If a multiple of task period, replenish remaining execution time
 		for(t in tasks){
+			console.log("To go:" + remainingExecutionTime[t] + " Current Time:" + i + " i mod period:" + (i % tasks[t]['period']) + " Start:" + tasks[t]['start']);
 			if((i % tasks[t]['period']) == tasks[t]['start']){
 				if(remainingExecutionTime[t] != 0){
 					console.log("ERROR: " + t);
+					return "Error";
 				}
 				remainingExecutionTime[t] = tasks[t]['wcet'];
 			}
@@ -158,7 +170,6 @@ function rmSchedule(tasks, simLen){
 		var taskToRun = null;
 		var taskToRunPeriod = null;
 		for(t in tasks){
-			//console.log(t);
 			if(remainingExecutionTime[t] != 0){
 				if(taskToRunPeriod == null){
 					taskToRun = t;
@@ -170,14 +181,9 @@ function rmSchedule(tasks, simLen){
 			}
 		}
 		//Decrement remaining execution time
-		console.log(taskToRun);
 		if(taskToRun != null){
-			//console.log("Starting checks...");
+			console.log("i:" + i + " task:" + taskToRun);
 			remainingExecutionTime[taskToRun]--;
-			if(remainingExecutionTime[taskToRun] == 0){
-				//console.log("Done with this task for now: " + taskToRun);
-				schedulable[taskToRun] = true;
-			}
 			
 			if(taskToRun == timeSegment[2]){
 				timeSegment[1]++;
@@ -189,7 +195,10 @@ function rmSchedule(tasks, simLen){
 				timeSegment[1] = i+1;
 				timeSegment[2] = taskToRun;
 			}
-		} 
+		} else {
+			schedule.push([timeSegment[0], timeSegment[1], timeSegment[2]]);
+			timeSegment = [null, null, null];
+		}
 	}	
 	schedule.push([timeSegment[0], timeSegment[1], timeSegment[2]]);
 	return schedule;
@@ -210,6 +219,7 @@ function minLaxSchedule(tasks, simLen){
 			if((i % tasks[t]['period']) == tasks[t]['start']){
 				if(remainingExecutionTime[t] != 0){
 					console.log("ERROR: " + t);
+					return "Error";
 				}
 				remainingExecutionTime[t] = tasks[t]['wcet'];
 			}
@@ -265,7 +275,10 @@ function minLaxSchedule(tasks, simLen){
 				timeSegment[1] = i+1;
 				timeSegment[2] = taskToRun;	
 			}
-		} 
+		}  else {
+			schedule.push([timeSegment[0], timeSegment[1], timeSegment[2]]);
+			timeSegment = [null, null, null];
+		}
 	}	
 	schedule.push([timeSegment[0], timeSegment[1], timeSegment[2]]);
 	return schedule;
