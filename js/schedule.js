@@ -17,24 +17,36 @@ $(function(){
 	//This is where setup stuff should happen.
 	$("#schedule_graphs").append("<div id='schedules'>Add some tasks and click 'Create Schedule'\
 	to give it a try!</div>");
-	
+	 
 });
 
 function generatePlots(schedules){
 	$("#schedules").empty();
 	for(s in schedules){
 		//Generate a schedule plot for each of the provided schedules.
-		generatePlot(parseInt(s), schedules[s]);
+		if(schedules[s]['schedulable']){
+			generatePlot(parseInt(s), schedules[s]);
+		} else {
+			generateErrorDiv(schedules[s]['name']);
+		}
 	}
+}
+
+function generateErrorDiv(name){
+	$("#schedules").append("<div class='schedule_wrap' id='schedule_wrap_"+s+"'></div>");
+	$("#schedule_wrap_"+s).append("<div class='schedule_name' id='sched_name_"+s+"'>"+name+"</div>");	
+	$("#schedule_wrap_"+s).append("<div class='schedule_error' id='schedule_"+s+"'>Not schedulable\
+	using this algorithm.</div>");
 }
 
 function generatePlot(s, schedule){
 	$("#schedules").append("<div class='schedule_wrap' id='schedule_wrap_"+s+"'></div>");
+	$("#schedule_wrap_"+s).append("<div class='schedule_name' id='sched_name_"+s+"'>"+schedule['name']+"</div>");	
 	$("#schedule_wrap_"+s).append("<div class='schedule' id='schedule_"+s+"'></div>");
 	$("#schedule_wrap_"+s).append("<div class='overview' id='overview_"+s+"'></div>");
 	var points = [];
-	for(segment in schedule){
-		var seg = schedule[segment];
+	for(segment in schedule['timing']){
+		var seg = schedule['timing'][segment];
 		var segStart = seg[0];
 		var segEnd = seg[1];
 		var plotPt = [];
@@ -106,14 +118,13 @@ function storeTasks(tasks){
 		//alert("ID:" + id + " Name:" + name + " WCET:" + wcet + " Start:"+ start + " Period:" + period); 
 		var task = {'id':id, 'name':name, 'wcet':parseInt(wcet), 'start':parseInt(start), 'period':parseInt(period)};
 		tasks.push(task);
-		//console.log(tasks);
 	});
 }
 
 function generateSchedule(tasks){
 	schedules = [];
-	simLen = periodLCM(tasks);
-	schedules.push(nonSchedule(tasks));
+	simLen = 2*periodLCM(tasks);
+	//schedules.push(nonSchedule(tasks));
 	schedules.push(rmSchedule(tasks, simLen));
 	schedules.push(minLaxSchedule(tasks, simLen));
 	//ADD MORE SCHEDULING ALGORITHMS HERE
@@ -127,38 +138,38 @@ function nonSchedule(tasks){
 		schedule.push([currTime, currTime + tasks[t]['wcet'], t]); 
 		currTime += tasks[t]['wcet'];
 	}
-	//console.log(schedule);
 	return schedule;
 }
 
 function rmSchedule(tasks, simLen){
-	var schedule = []
+	var schedule = new Array();
+	schedule['name'] = "Rate Monotonic";
+	schedule['schedulable'] = true;
+	schedule['timing'] = [];
 	
 	var remainingExecutionTime = new Array();
 	var schedulable = new Array();
 	for(t in tasks){
-		remainingExecutionTime.push(tasks[t]['wcet']);
+		remainingExecutionTime.push(0);
 		schedulable.push(false);
 	}
 	var timeSegment = [null, null, null];
 	for(var i = 0; i < simLen; i++){
-		//console.log(remainingExecutionTime);
 		//If a multiple of task period, replenish remaining execution time
-		if(i != 0){
-			for(t in tasks){
-				if((i % tasks[t]['period']) == 0){
-					if(remainingExecutionTime[t] != 0){
-						console.log("ERROR: " + t);
-					}
-					remainingExecutionTime[t] = tasks[t]['wcet'];
+		for(t in tasks){
+			if((i % tasks[t]['period']) == tasks[t]['start']){
+				if(remainingExecutionTime[t] != 0){
+					schedule['schedulable'] = false;
+					return schedule;
 				}
+				remainingExecutionTime[t] = tasks[t]['wcet'];
 			}
-		}		
+		}
+	
 		//Determine which task executes during each time unit.
 		var taskToRun = null;
 		var taskToRunPeriod = null;
 		for(t in tasks){
-			//console.log(t);
 			if(remainingExecutionTime[t] != 0){
 				if(taskToRunPeriod == null){
 					taskToRun = t;
@@ -171,54 +182,51 @@ function rmSchedule(tasks, simLen){
 		}
 		//Decrement remaining execution time
 		if(taskToRun != null){
-			//console.log("Starting checks...");
 			remainingExecutionTime[taskToRun]--;
-			if(remainingExecutionTime[taskToRun] == 0){
-				//console.log("Done with this task for now: " + taskToRun);
-				schedulable[taskToRun] = true;
-			}
 			
 			if(taskToRun == timeSegment[2]){
 				timeSegment[1]++;
 			} else {
-				if(timeSegment[0] == null){
-					timeSegment[0] = 0;
-					timeSegment[1] = 1;
-					timeSegment[2] = taskToRun;
-				} else {
-					schedule.push([timeSegment[0], timeSegment[1], timeSegment[2]]);
-					timeSegment[0] = i;
-					timeSegment[1] = i+1;
-					timeSegment[2] = taskToRun;
+				if(timeSegment[0] != null){
+					schedule['timing'].push([timeSegment[0], timeSegment[1], timeSegment[2]]);
 				}
+				timeSegment[0] = i;
+				timeSegment[1] = i+1;
+				timeSegment[2] = taskToRun;
 			}
-		} 
+		} else {
+			schedule['timing'].push([timeSegment[0], timeSegment[1], timeSegment[2]]);
+			timeSegment = [null, null, null];
+		}
 	}	
-	schedule.push([timeSegment[0], timeSegment[1], timeSegment[2]]);
+	schedule['timing'].push([timeSegment[0], timeSegment[1], timeSegment[2]]);
 	return schedule;
 }
 
 function minLaxSchedule(tasks, simLen){
-	var schedule = []
+	var schedule = new Array();
+	schedule['name'] = "Minimum Laxity First";
+	schedule['schedulable'] = true;
+	schedule['timing'] = [];
 	
 	var remainingExecutionTime = new Array();
 	var schedulable = new Array();
 	for(t in tasks){
-		remainingExecutionTime.push(tasks[t]['wcet']);
+		remainingExecutionTime.push(0);
 		schedulable.push(false);
 	}
 	var timeSegment = [null, null, null];
-	for(var i = 0; i < simLen; i++){
-		if(i != 0){
-			for(t in tasks){
-				if((i % tasks[t]['period']) == 0){
-					if(remainingExecutionTime[t] != 0){
-						console.log("ERROR: " + t);
-					}
-					remainingExecutionTime[t] = tasks[t]['wcet'];
+	for(var i = 0; i < simLen; i++){		
+		for(t in tasks){
+			if((i % tasks[t]['period']) == tasks[t]['start']){
+				if(remainingExecutionTime[t] != 0){
+					schedule['schedulable'] = false;
+					return schedule;
 				}
+				remainingExecutionTime[t] = tasks[t]['wcet'];
 			}
-		}		
+		}
+		
 		//Determine which task executes during each time unit.
 		/*
 		 * This is where the choice to run one task over another is made
@@ -252,30 +260,27 @@ function minLaxSchedule(tasks, simLen){
 		}
 		//Decrement remaining execution time
 		if(taskToRun != null){
-			//console.log("Starting checks...");
 			remainingExecutionTime[taskToRun]--;
 			if(remainingExecutionTime[taskToRun] == 0){
-				//console.log("Done with this task for now: " + taskToRun);
 				schedulable[taskToRun] = true;
 			}
 			
 			if(taskToRun == timeSegment[2]){
 				timeSegment[1]++;
 			} else {
-				if(timeSegment[0] == null){
-					timeSegment[0] = 0;
-					timeSegment[1] = 1;
-					timeSegment[2] = taskToRun;
-				} else {
-					schedule.push([timeSegment[0], timeSegment[1], timeSegment[2]]);
-					timeSegment[0] = i;
-					timeSegment[1] = i+1;
-					timeSegment[2] = taskToRun;
+				if(timeSegment[0] != null){
+					schedule['timing'].push([timeSegment[0], timeSegment[1], timeSegment[2]]);
 				}
+				timeSegment[0] = i;
+				timeSegment[1] = i+1;
+				timeSegment[2] = taskToRun;	
 			}
-		} 
+		}  else {
+			schedule['timing'].push([timeSegment[0], timeSegment[1], timeSegment[2]]);
+			timeSegment = [null, null, null];
+		}
 	}	
-	schedule.push([timeSegment[0], timeSegment[1], timeSegment[2]]);
+	schedule['timing'].push([timeSegment[0], timeSegment[1], timeSegment[2]]);
 	return schedule;
 }
 

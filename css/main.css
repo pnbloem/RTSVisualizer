@@ -12,7 +12,7 @@ body{
 #header_wrap{
 	border:2px solid black;
 	background-color:#8EB8CC;
-	color:black;
+	color:white;
 	position:absolute;
 	left:0px;
 	top:0px;
@@ -48,6 +48,7 @@ body{
 	text-align:center;
 	margin-top:10px;
 	border:1px solid black;
+	border-radius: 4px;
 }
 #add_task:hover{
 	background-color:#475C66;
@@ -61,6 +62,7 @@ body{
 	text-align:center;
 	margin-top:10px;	
 	border:1px solid black;
+	border-radius:4px;
 }
 #create_sched:hover{
 	background-color:#475C66;
@@ -83,13 +85,28 @@ body{
 div.schedule{
 	height:200px;
 	width:650px;
+	margin-top:15px;
+	margin-left:15px;
 }
 div.overview{
 	height:40px;
 	width:650px;
+	margin-left:15px;
 }
 div.schedule_wrap{
 	margin:15px;
-	padding:15px;
-	border:1px solid blue;
+	border:1px solid black;
+	border-radius:4px;
+	background-color:white;
 }	
+div.schedule_name{
+	background-color:#8EB8CC;
+	color:white;
+	border-bottom:1px solid black;
+	padding:10px;
+}
+div.schedule_error{
+	padding:10px;
+	color:black;
+	background-color:#FFC1C1;
+}
