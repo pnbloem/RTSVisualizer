@@ -127,6 +127,7 @@ function generateSchedule(tasks){
 	//schedules.push(nonSchedule(tasks));
 	schedules.push(rmSchedule(tasks, simLen));
 	schedules.push(minLaxSchedule(tasks, simLen));
+	schedules.push(nearCompletion(tasks, simLen));
 	//ADD MORE SCHEDULING ALGORITHMS HERE
 	generatePlots(schedules);
 }
@@ -283,6 +284,108 @@ function minLaxSchedule(tasks, simLen){
 	schedule['timing'].push([timeSegment[0], timeSegment[1], timeSegment[2]]);
 	return schedule;
 }
+
+// Zach did this, so blame him when it fucks up!
+// TIME TO COMPLETION
+function nearCompletion(tasks, simLen){
+	var schedule = new Array();
+	schedule['name'] = "Nearest Time to Completion";
+	schedule['schedulable'] = true;
+	schedule['timing'] = [];
+	
+	var remainingExecutionTime = new Array();
+	var schedulable = new Array();
+	for(t in tasks){
+		remainingExecutionTime.push(0);
+		schedulable.push(false);
+	}
+	var timeSegment = [null, null, null];
+	
+	for(var i = 0; i < simLen; i++){		
+		for(t in tasks){
+			if((i % tasks[t]['period']) == tasks[t]['start']){
+				if(remainingExecutionTime[t] != 0){
+					schedule['schedulable'] = false;
+					return schedule;
+				}
+				remainingExecutionTime[t] = tasks[t]['wcet'];
+			}
+		}
+		
+		//Determine which task executes during each time unit.
+		/*
+		 * This is where the choice to run one task over another is made
+		 * at any given point in time (i). To do this, choose the variable
+		 * you're making the decision on (in this case, taskToRunLaxity).
+		 * Then, in the if(taskToRunLaxity == null) statement, set the 
+		 * value (This will give a baseline task that will run. If no
+		 * tasks have execution time yet, taskToRun remains null, and
+		 * the schedule appropriately has a gap.), and the taskToRun.
+		 *
+		 * In the else if statement, check if the current task you're
+		 * checking should have higher priority. In this case, whether
+		 * the laxity is less than the minimum laxity found thus far.
+		 * If the task should have higher priority, replace taskToRun
+		 * and the decision variable with those from the new task.
+		 *
+		 * That's it! Everything else is taken care of!
+  		 */
+//CHANGES START HERE
+		// NEAREST TIME TO COMPLETION
+		// 
+		
+		var taskToRun = null;
+		var timeToComplete = null; //new
+		for(t in tasks){							// for each task
+			if(remainingExecutionTime[t] != 0){		//if it isn't done running
+				
+				if(timeToComplete == null) {			//base case. if there's only 1 value tried so far, it's the best yo!
+					taskToRun = t;					//i is the current time
+													// i % tasks[t]['period'] -> how far into current period we are
+							 
+					timeToComplete = remainingExecutionTime[t];
+				
+				} else if( remainingExecutionTime[t] < timeToComplete){
+					taskToRun = t;
+					timeToComplete = remainingExecutionTime[t];
+				}
+			}
+		}
+//CHANGES STOP HERE
+		//Decrement remaining execution time
+		if(taskToRun != null){
+			remainingExecutionTime[taskToRun]--;
+			if(remainingExecutionTime[taskToRun] == 0){
+				schedulable[taskToRun] = true;
+			}
+			
+			if(taskToRun == timeSegment[2]){
+				timeSegment[1]++;
+			} else {
+				if(timeSegment[0] != null){
+					schedule['timing'].push([timeSegment[0], timeSegment[1], timeSegment[2]]);
+				}
+				timeSegment[0] = i;
+				timeSegment[1] = i+1;
+				timeSegment[2] = taskToRun;	
+			}
+		}  else {
+			schedule['timing'].push([timeSegment[0], timeSegment[1], timeSegment[2]]);
+			timeSegment = [null, null, null];
+		}
+	}	
+	schedule['timing'].push([timeSegment[0], timeSegment[1], timeSegment[2]]);
+	return schedule;
+}
+
+
+
+
+
+
+
+
+
 
 function gcd(a, b){
 	var t;

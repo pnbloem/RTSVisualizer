@@ -16,8 +16,9 @@ function generateTaskHTML(id){
 						<tr><th>Name</th><td><input id='name_"+id+"' class='widefield' type='text' onblur='parseName(this)' /></td></tr>\
 						<tr><th>WCET</th><td><input id='wcet_"+id+"' type='number' /></td></tr>\
 						<tr><th>Start Time</th><td><input id='start_"+id+"' type='number' /></td></tr>\
-						<tr><th>Period (Deadline)</th><td><input id='period_"+id+"' type='number' /></td></tr>"
-					
+						<tr><th>Period (Deadline)</th><td><input id='period_"+id+"' type='number' /></td></tr>\
+						<tr><td colspan='2' style='text-align:center'><div class='del_task' onclick=delTask("+id+")>Delete Task</div></td></tr>";
+						
 	tasklist_div += "</table></div></div>";
 	numTasks++;
 	return tasklist_div;
@@ -29,6 +30,21 @@ function generateTaskHTML(id){
 							</ul></td></tr>\
 						<tr><th>Color</th><td>--</td></tr> -->\
 	*/
+}
+
+function delTask(id) {
+	$("#tasklist").accordion('destroy');
+	
+	convert = $("#"+id).siblings('div');
+	$("#"+id).prev().remove();
+	$("#"+id).remove();
+	convert.each(function(ndx, ele) {
+		$(ele).attr('id', ndx);
+	});
+	numTasks--;
+	
+	$("#tasklist").accordion({'collapsible':true});
+	$("#tasklist").accordion("activate", $("#tasklist h3:last") );
 }
 
 function addTask() {

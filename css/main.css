@@ -64,6 +64,24 @@ body{
 	border:1px solid black;
 	border-radius:4px;
 }
+
+.del_task{
+	background-color:#8EB8CC;
+	height:15px;
+	font-size: 10pt;
+	width: 100px;
+
+	margin: 2pt auto;
+	border:1px solid black;
+	border-radius: 4px;
+}
+.del_task:hover{
+	background-color:#475C66;
+	color:white;
+	cursor:pointer;
+}
+
+
 #create_sched:hover{
 	background-color:#475C66;
 	color:white;
