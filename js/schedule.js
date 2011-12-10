@@ -128,6 +128,7 @@ function generateSchedule(tasks){
 	schedules.push(rmSchedule(tasks, simLen));
 	schedules.push(minLaxSchedule(tasks, simLen));
 	schedules.push(nearCompletion(tasks, simLen));
+	schedules.push(edfSchedule(tasks, simLen));
 	//ADD MORE SCHEDULING ALGORITHMS HERE
 	generatePlots(schedules);
 }
@@ -252,10 +253,10 @@ function minLaxSchedule(tasks, simLen){
 			if(remainingExecutionTime[t] != 0){
 				if(taskToRunLaxity == null){
 					taskToRun = t;
-					taskToRunLaxity = (tasks[t]['period'] - (i % tasks[t]['period']));
-				} else if((tasks[t]['period'] - (i % tasks[t]['period'])) < taskToRunLaxity){
+					taskToRunLaxity = ((i - tasks[t]['start']) % tasks[t]['period']) - remainingExecutionTime[t];
+				} else if((((i - tasks[t]['start']) % tasks[t]['period']) - remainingExecutionTime[t]) < taskToRunLaxity){
 					taskToRun = t;
-					taskToRunLaxity = (tasks[t]['period'] - (i % tasks[t]['period']));
+					taskToRunLaxity = ((i - tasks[t]['start']) % tasks[t]['period']) - remainingExecutionTime[t];
 				}
 			}
 		}
@@ -378,7 +379,69 @@ function nearCompletion(tasks, simLen){
 	return schedule;
 }
 
-
+function edfSchedule(tasks, simLen){
+	var schedule = new Array();
+	schedule['name'] = "Earliest Deadline First";
+	schedule['schedulable'] = true;
+	schedule['timing'] = [];
+	
+	var remainingExecutionTime = new Array();
+	var schedulable = new Array();
+	for(t in tasks){
+		remainingExecutionTime.push(0);
+		schedulable.push(false);
+	}
+	var timeSegment = [null, null, null];
+	for(var i = 0; i < simLen; i++){
+		//If a multiple of task period, replenish remaining execution time
+		for(t in tasks){
+			if((i % tasks[t]['period']) == tasks[t]['start']){
+				if(remainingExecutionTime[t] != 0){
+					schedule['schedulable'] = false;
+					return schedule;
+				}
+				remainingExecutionTime[t] = tasks[t]['wcet'];
+			}
+		}
+	
+		//Determine which task executes during each time unit.
+		var taskToRun = null;
+		var taskTimeToDeadline = null;
+		for(t in tasks){
+			var period = tasks[t]['period'];
+			var start = tasks[t]['start']
+			if(remainingExecutionTime[t] != 0){
+				if(taskTimeToDeadline == null){
+					taskToRun = t;
+					taskTimeToDeadline = period - ((i-start) % period);
+				} else if((period - ((i-start) % period)) < taskTimeToDeadline){
+					taskToRun = t;
+					taskTimeToDeadline = period - ((i-start) % period);
+				}
+			}
+		}
+		//Decrement remaining execution time
+		if(taskToRun != null){
+			remainingExecutionTime[taskToRun]--;
+			
+			if(taskToRun == timeSegment[2]){
+				timeSegment[1]++;
+			} else {
+				if(timeSegment[0] != null){
+					schedule['timing'].push([timeSegment[0], timeSegment[1], timeSegment[2]]);
+				}
+				timeSegment[0] = i;
+				timeSegment[1] = i+1;
+				timeSegment[2] = taskToRun;
+			}
+		} else {
+			schedule['timing'].push([timeSegment[0], timeSegment[1], timeSegment[2]]);
+			timeSegment = [null, null, null];
+		}
+	}	
+	schedule['timing'].push([timeSegment[0], timeSegment[1], timeSegment[2]]);
+	return schedule;
+}
 
 
 
