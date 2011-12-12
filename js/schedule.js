@@ -105,12 +105,18 @@ function scheduleTasks(){
 }
 
 function storeTasks(tasks){
+	var taskId = 1;
 	$("#tasklist").find(".task").each(function(){
-		var id = $(this).attr('id');
-		var name = $(this).find('#name_'+id).val();
-		var wcet = $(this).find('#wcet_'+id).val();
-		var start = $(this).find('#start_'+id).val();
-		var period = $(this).find('#period_'+id).val();
+		var id = taskId;
+		taskId++;
+		var name = $(this).find('.name').val();
+		alert(name);
+		var wcet = $(this).find('.wcet').val();
+		alert(wcet);
+		var start = $(this).find('.start').val();
+		alert(start);
+		var period = $(this).find('.period').val();
+		alert(period);
 		if((id == "") || (name == "") || (wcet == "") || (start == "") || (period == "")){
 			alert("Please fill in all values.");
 			return;
@@ -442,13 +448,6 @@ function edfSchedule(tasks, simLen){
 	schedule['timing'].push([timeSegment[0], timeSegment[1], timeSegment[2]]);
 	return schedule;
 }
-
-
-
-
-
-
-
 
 function gcd(a, b){
 	var t;
