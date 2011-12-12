@@ -5,18 +5,89 @@ $(function() {
 	$("#task_list").append("<div id='tasklist'></div>");
 	$("#task_list").append("<div id='add_task' onclick='addTask()'>Add New Task</div>");
 	$("#task_list").append("<div id='create_sched' onclick='scheduleTasks()'>Create Schedule</div>");
+	
+	$("#task_list").append("<form><input type='file' id='file_input' style='position:absolute; top:-100px;'  ></form>");
+	// onchange='loadSched(this.files)'
+	
+	$("#task_list").append("<div id='load_sched' onclick='$(\"#file_input\").click();'>Load File</div>");
+	$("#task_list").append("<div id='load_sched' onclick='saveSched()'>Save File</div>");
+
 	$("#tasklist").append(generateTaskHTML(numTasks));
 	$("#tasklist").accordion({'collapsible':true});
+	
+	$('#file_input').change(newLoadSched);
 });
+
+function newLoadSched(event) {
+	file = this.files[0]; // not sure of the scope on 'this'...
+	//window.alert(file.name + "\n" + file.size + "\n" + file.type);
+	
+	reader = new FileReader();
+	reader.onload = function(event) { 
+		//window.alert("okay!\n"+event.target.result);
+		
+		tree = $( $.parseXML(event.target.result) );
+		
+		$("#header").append( " :: "+tree.find("title").text() );
+		
+		$("#tasklist").accordion('destroy');
+		$("#tasklist").empty();
+		numTasks = 0;
+		
+		tree.find("task").each(function() {
+			$("#tasklist").append(generateTaskHTML(numTasks));
+			
+			id = numTasks - 1;
+			$("#tasklist h3:last a").text( $(this).find("name").text() );
+						
+			$("#name_"+id).val( $(this).find("name").text() );
+			$("#wcet_"+id).val( $(this).find("wcet").text() );
+			$("#start_"+id).val( $(this).find("start").text() );
+			$("#period_"+id).val( $(this).find("period").text() );
+			
+			//window.alert(foo);
+		});
+		$("#tasklist").accordion({'collapsible':true});
+		$("#tasklist").accordion("activate", $("#tasklist h3:last") );
+		
+		
+	}
+	reader.onerror = function(event) { 
+		window.alert("Error! Could not read input file.\n"+event ); 
+	}
+	reader.readAsText(file);
+
+	
+	//window.alert("newLoadSched");
+}
+
+
+function loadSched(files) {
+	if(files.length != 1) { return; }
+	
+	file = files[0];
+	
+	window.alert(file.name + "\n" + file.size + "\n" + file.type);
+	
+	// http://development.zeta-two.com/stable/file-api/file.html
+	reader = new FileReader();
+	reader.onload = function(event) { window.alert("okay!\n"+event.target.result); }
+	reader.onerror = function(event) { window.alert("error!\n"+event.getMessage() ); }
+	reader.readAsText(file);
+}
+function saveSched() {
+	window.alert("saveSched!");
+}
+
 
 function generateTaskHTML(id){
 	var tasklist_div = "<h3><a href='#'>New Task</a></h3>\
 				<div id='"+id+"' class='task' > <!-- id='0' -->\
 					<table>\
-						<tr><th>Name</th><td><input id='name_"+id+"' class='widefield' type='text' onblur='parseName(this)' /></td></tr>\
-						<tr><th>WCET</th><td><input id='wcet_"+id+"' type='number' /></td></tr>\
-						<tr><th>Start Time</th><td><input id='start_"+id+"' type='number' /></td></tr>\
-						<tr><th>Period (Deadline)</th><td><input id='period_"+id+"' type='number' /></td></tr>\
+						<tr><th>Name</th><td><input id='name_"+id+"' class='widefield name' type='text' onblur='parseName(this)' /></td></tr>\
+						<tr><th>WCET</th><td><input id='wcet_"+id+"' type='number' class='wcet' /></td></tr>\
+						<tr><th>Start Time</th><td><input id='start_"+id+"' type='number' class='start' /></td></tr>\
+						<tr><th>Period (Deadline)</th><td><input id='period_"+id+"' type='number' class='period' /></td></tr>\
 						<tr><td colspan='2' style='text-align:center'><div class='del_task' onclick=delTask("+id+")>Delete Task</div></td></tr>";
 						
 	tasklist_div += "</table></div></div>";

@@ -1,0 +1,35 @@
+<input>
+	<title>Example Task Set</title>
+	<taskset>
+		<task>
+			<name>Alpha</name>
+			<wcet>10</wcet>
+			<start>1</start>
+			<period>30</period>
+		</task>
+		<task>
+			<name>Beta</name>
+			<wcet>2</wcet>
+			<start>3</start>
+			<period>30</period>
+		</task>
+		<task>
+			<name>Gamma</name>
+			<wcet>15</wcet>
+			<start>10</start>
+			<period>60</period>
+		</task>
+		<task>
+			<name>Delta</name>
+			<wcet>1</wcet>
+			<start>25</start>
+			<period>10</period>
+		</task>
+		<task>
+			<name>Epsilon</name>
+			<wcet>5</wcet>
+			<start>10</start>
+			<period>20</period>
+		</task>
+	</taskset>
+</input>

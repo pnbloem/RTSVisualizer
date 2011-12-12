@@ -64,6 +64,33 @@ body{
 	border:1px solid black;
 	border-radius:4px;
 }
+#create_sched:hover{
+	background-color:#475C66;
+	color:white;
+	cursor:pointer;
+}
+
+
+
+#load_sched, #save_sched{
+	background-color:#8EB8CC;
+	height:25px;
+	line-height:25px;
+	text-align:center;
+	margin-top:10px;	
+	border:1px solid black;
+	border-radius:4px;
+	width: 45%;
+	display: inline-table;
+	margin: 10px 5px;
+}
+#load_sched:hover, #save_sched:hover{
+	background-color:#475C66;
+	color:white;
+	cursor:pointer;
+}
+
+
 
 .del_task{
 	background-color:#8EB8CC;
