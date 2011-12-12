@@ -110,13 +110,9 @@ function storeTasks(tasks){
 		var id = taskId;
 		taskId++;
 		var name = $(this).find('.name').val();
-		alert(name);
 		var wcet = $(this).find('.wcet').val();
-		alert(wcet);
 		var start = $(this).find('.start').val();
-		alert(start);
 		var period = $(this).find('.period').val();
-		alert(period);
 		if((id == "") || (name == "") || (wcet == "") || (start == "") || (period == "")){
 			alert("Please fill in all values.");
 			return;
