@@ -1,4 +1,4 @@
-var numTasks = 0;
+//var numTasks = 0;
 $(function() {
 	//window.alert('hello');
 
@@ -12,7 +12,7 @@ $(function() {
 	$("#task_list").append("<div id='load_sched' onclick='$(\"#file_input\").click();'>Load File</div>");
 	$("#task_list").append("<div id='load_sched' onclick='saveSched()'>Save File</div>");
 
-	$("#tasklist").append(generateTaskHTML(numTasks));
+	$("#tasklist").append(generateTaskHTML());
 	$("#tasklist").accordion({'collapsible':true});
 	
 	$('#file_input').change(newLoadSched);
@@ -32,20 +32,20 @@ function newLoadSched(event) {
 		
 		$("#tasklist").accordion('destroy');
 		$("#tasklist").empty();
-		numTasks = 0;
+		//numTasks = 0;
 		
 		tree.find("task").each(function() {
-			$("#tasklist").append(generateTaskHTML(numTasks));
+			$("#tasklist").append(generateTaskHTML());
 			
-			id = numTasks - 1;
+			//id = numTasks - 1;
 			$("#tasklist h3:last a").text( $(this).find("name").text() );
-						
-			$("#name_"+id).val( $(this).find("name").text() );
-			$("#wcet_"+id).val( $(this).find("wcet").text() );
-			$("#start_"+id).val( $(this).find("start").text() );
-			$("#period_"+id).val( $(this).find("period").text() );
 			
-			//window.alert(foo);
+			$("#tasklist div.task:last .name").val( $(this).find("name").text() );
+			$("#tasklist div.task:last .wcet").val( $(this).find("wcet").text() );
+			$("#tasklist div.task:last .start").val( $(this).find("start").text() );
+			$("#tasklist div.task:last .period").val( $(this).find("period").text() );
+			
+			
 		});
 		$("#tasklist").accordion({'collapsible':true});
 		$("#tasklist").accordion("activate", $("#tasklist h3:last") );
@@ -80,18 +80,19 @@ function saveSched() {
 }
 
 
-function generateTaskHTML(id){
+function generateTaskHTML(){
+	//id='"+id+"' 
 	var tasklist_div = "<h3><a href='#'>New Task</a></h3>\
-				<div id='"+id+"' class='task' > <!-- id='0' -->\
+				<div class='task' >\
 					<table>\
-						<tr><th>Name</th><td><input id='name_"+id+"' class='widefield name' type='text' onblur='parseName(this)' /></td></tr>\
-						<tr><th>WCET</th><td><input id='wcet_"+id+"' type='number' class='wcet' /></td></tr>\
-						<tr><th>Start Time</th><td><input id='start_"+id+"' type='number' class='start' /></td></tr>\
-						<tr><th>Period (Deadline)</th><td><input id='period_"+id+"' type='number' class='period' /></td></tr>\
-						<tr><td colspan='2' style='text-align:center'><div class='del_task' onclick=delTask("+id+")>Delete Task</div></td></tr>";
+						<tr><th>Name</th><td><input class='widefield name' type='text' onblur='parseName(this)' /></td></tr>\
+						<tr><th>WCET</th><td><input type='number' class='wcet' /></td></tr>\
+						<tr><th>Start Time</th><td><input type='number' class='start' /></td></tr>\
+						<tr><th>Period (Deadline)</th><td><input type='number' class='period' /></td></tr>\
+						<tr><td colspan='2' style='text-align:center'><div class='del_task' onclick='delTask(this)'>Delete Task</div></td></tr>";
 						
 	tasklist_div += "</table></div></div>";
-	numTasks++;
+	//numTasks++;
 	return tasklist_div;
 	/*
 	<!--	<tr><th>Priority</th><td>\
@@ -103,16 +104,13 @@ function generateTaskHTML(id){
 	*/
 }
 
-function delTask(id) {
+function delTask(element) {
 	$("#tasklist").accordion('destroy');
 	
-	convert = $("#"+id).siblings('div');
-	$("#"+id).prev().remove();
-	$("#"+id).remove();
-	convert.each(function(ndx, ele) {
-		$(ele).attr('id', ndx);
-	});
-	numTasks--;
+	$(element).closest("div.task").prev().remove();
+	$(element).closest("div.task").remove();
+	
+	//numTasks--;
 	
 	$("#tasklist").accordion({'collapsible':true});
 	$("#tasklist").accordion("activate", $("#tasklist h3:last") );
@@ -120,7 +118,7 @@ function delTask(id) {
 
 function addTask() {
 	$("#tasklist").accordion('destroy');
-	$("#tasklist").append(generateTaskHTML(numTasks));
+	$("#tasklist").append(generateTaskHTML());
 	$("#tasklist").accordion({'collapsible':true});
 	$("#tasklist").accordion("activate", $("#tasklist h3:last") );
 }
