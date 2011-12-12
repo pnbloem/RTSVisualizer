@@ -28,7 +28,7 @@ function newLoadSched(event) {
 		
 		tree = $( $.parseXML(event.target.result) );
 		
-		$("#header").append( " :: "+tree.find("title").text() );
+		$("#header").html("Real-Time Schedule Visualizer :: "+tree.find("title").text() );
 		
 		$("#tasklist").accordion('destroy');
 		$("#tasklist").empty();
@@ -75,7 +75,31 @@ function loadSched(files) {
 	reader.readAsText(file);
 }
 function saveSched() {
-	window.alert("saveSched!");
+	
+	title = $("#header").html();
+	title = title.substring( title.indexOf(":: ")+3 );
+		
+	var xml = "<input>\n\t<title>"+title+"</title>\n\t<taskset>\n";
+	$("#tasklist div.task").each(function(){
+		//window.alert($(this).html());
+		xml += "\t\t<task>\n";
+		xml += "\t\t\t<name>"+$(this).find(".name").val()+"</name>\n";
+		xml += "\t\t\t<wcet>"+$(this).find(".wcet").val()+"</wcet>\n";
+		xml += "\t\t\t<start>"+$(this).find(".start").val()+"</start>\n";
+		xml += "\t\t\t<period>"+$(this).find(".period").val()+"</period>\n";
+
+		
+		xml += "\t\t</task>\n";
+		
+	});
+	xml += "\t</taskset>\n</input>";
+	
+	//window.alert(xml);
+	
+	//uriContent = "data:text/xml," + encodeURIComponent(xml);
+	uriContent = "data:application/octet-stream,"+encodeURIComponent(xml);
+	newWindow = window.open(uriContent, 'newDocument');
+	
 }
 
 
