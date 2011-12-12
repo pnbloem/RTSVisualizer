@@ -1,0 +1,17 @@
+<input>
+	<title>Example Task Set 3</title>
+	<taskset>
+		<task>
+			<name>Alpha</name>
+			<wcet>5</wcet>
+			<start>0</start>
+			<period>10</period>
+		</task>
+		<task>
+			<name>Beta</name>
+			<wcet>5</wcet>
+			<start>0</start>
+			<period>11</period>
+		</task>
+	</taskset>
+</input>

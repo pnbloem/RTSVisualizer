@@ -117,6 +117,10 @@ function storeTasks(tasks){
 			alert("Please fill in all values.");
 			return;
 		}
+		if(parseInt(start) > parseInt(period)){
+			alert("Start times must be less than period durations.");
+			return;
+		}
 		//alert("ID:" + id + " Name:" + name + " WCET:" + wcet + " Start:"+ start + " Period:" + period); 
 		var task = {'id':id, 'name':name, 'wcet':parseInt(wcet), 'start':parseInt(start), 'period':parseInt(period)};
 		tasks.push(task);

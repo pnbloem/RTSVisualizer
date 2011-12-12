@@ -1,5 +1,5 @@
 <input>
-	<title>Example Task Set</title>
+	<title>Example Task Set 1</title>
 	<taskset>
 		<task>
 			<name>Alpha</name>
@@ -22,7 +22,7 @@
 		<task>
 			<name>Delta</name>
 			<wcet>1</wcet>
-			<start>25</start>
+			<start>0</start>
 			<period>10</period>
 		</task>
 		<task>
