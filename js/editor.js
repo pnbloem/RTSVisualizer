@@ -45,7 +45,6 @@ function newLoadSched(event) {
 			$("#tasklist div.task:last .start").val( $(this).find("start").text() );
 			$("#tasklist div.task:last .period").val( $(this).find("period").text() );
 			
-			
 		});
 		$("#tasklist").accordion({'collapsible':true});
 		$("#tasklist").accordion("activate", $("#tasklist h3:last") );
